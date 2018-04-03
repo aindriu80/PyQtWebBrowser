@@ -21,8 +21,8 @@ class App(QFrame):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Web Browser")
-        self.setBaseSize(1920, 1200)
         self.CreateApp()
+        self.setBaseSize(1920, 1200)
 
     def CreateApp(self):
         self.layout = QVBoxLayout()
@@ -32,6 +32,7 @@ class App(QFrame):
         # Create Tabs
         self.tabbar = QTabBar(movable=True, tabsClosable=True)
         self.tabbar.tabCloseRequested.connect(self.CloseTab)
+        self.tabbar.tabBarClicked.connect(self.SwitchTab)
 
         self.tabbar.setCurrentIndex(0)
 
@@ -88,15 +89,23 @@ class App(QFrame):
         # set top level tab from [] to layout
         self.tabs[i].setLayout(self.tabs[i].layout)
 
-        # Add tabe to top level stackwidget
+        # Add tabe to top level stackedwidget
         self.container.layout.addWidget(self.tabs[i])
         self.container.layout.setCurrentWidget(self.tabs[i])
 
         # Set the tab at the top of the screen
         self.tabbar.addTab("New Tab")
-        self.tabbar.setTabData(i,"tab" + str(i))
+        self.tabbar.setTabData(i, "tab" + str(i))
         self.tabbar.setCurrentIndex(i)
-        pass
+
+        self.tabCount += 1
+
+    def SwitchTab(self, i):
+        tab_data = self.tabbar.tabData(i)
+        print("tab:", tab_data)
+
+        tab_content = self.findChild(QWidget, tab_data)
+        self.oontainer.layout.setCurrentWidget(tab_content)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
