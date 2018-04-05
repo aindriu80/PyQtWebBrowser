@@ -21,8 +21,9 @@ class App(QFrame):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Web Browser")
-        self.CreateApp()
         self.setBaseSize(1920, 1200)
+        self.CreateApp()
+
 
     def CreateApp(self):
         self.layout = QVBoxLayout()
@@ -82,11 +83,15 @@ class App(QFrame):
 
         self.tabs.append(QWidget())
         self.tabs[i].layout = QVBoxLayout()
+        # For tab switching
         self.tabs[i].setObjectName("tab" + str(i))
 
-        # Open webview
+        # Create webview within the tabs top level widget
         self.tabs[i].content = QWebEngineView()
         self.tabs[i].content.load(QUrl.fromUserInput("https://www.google.ie/"))
+
+        # Add widget to tab.layout.
+        self.tabs[i].content.titleChanged.connect(lambda: self.SetTabText(i))
 
         # Add webview to tabs layout
         self.tabs[i].layout.addWidget(self.tabs[i].content)
@@ -100,7 +105,10 @@ class App(QFrame):
 
         # Set the tab at the top of the screen
         self.tabbar.addTab("New Tab")
-        self.tabbar.setTabData(i, "tab" + str(i))
+        self.tabbar.setTabData(i, {"object": "tab" + str(i), "initial": i})
+
+
+
         self.tabbar.setCurrentIndex(i)
 
         self.tabCount += 1
@@ -129,6 +137,29 @@ class App(QFrame):
             url = text
 
         wv.load(QUrl.fromUserInput(url))
+
+    def SetTabText(self, i):
+        # self.tabs[i].objectName = tab1
+        # self.tabbar.tabData(i)["object"] = tab1
+
+        tab_name = self.tabs[i].objectName()
+        # tab1
+
+        count = 0
+        running = True
+
+        while running:
+            tab_data_name = self.tabbar.tabData(count)
+
+            if count >= 99:
+                running = False
+
+            if tab_name == tab_data_name["object"]:
+                newTitle = self.findChild(QWidget, tab_name).content.title()
+                self.tabbar.setTabText(count, newTitle)
+                running = False
+            else:
+                count += 1
 
 
 if __name__ == "__main__":
