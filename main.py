@@ -53,21 +53,30 @@ class App(QFrame):
         self.addressbar.returnPressed.connect(self.BrowseTo)
         self.AddTabButton.clicked.connect(self.AddTab)
 
+        # Set Toolbar Buttons
+        self.BackButton = QPushButton("<")
+        self.BackButton.clicked.connect(self.GoBack)
+
+        self.ForwardButton = QPushButton(">")
+        self.ForwardButton.clicked.connect(self.GoForward)
+
+        self.ReloadButton = QPushButton("R")
+        self.ReloadButton.clicked.connect(self.ReloadPage)
+
         # Build toolbar
         self.Toolbar.setLayout(self.ToolbarLayout)
+        self.ToolbarLayout.addWidget(self.BackButton)
+        self.ToolbarLayout.addWidget(self.ForwardButton)
+        self.ToolbarLayout.addWidget(self.ReloadButton)
         self.ToolbarLayout.addWidget(self.addressbar)
-
-        # New tab button
-        self.AddTabButton = QPushButton("+")
-        self.AddTabButton.clicked.connect(self.AddTab)
-
         self.ToolbarLayout.addWidget(self.AddTabButton)
 
-        # set main view
+        # Set main view
         self.container = QWidget()
         self.container.layout = QStackedLayout()
         self.container.setLayout(self.container.layout)
 
+        # Construct main view from top level elements
         self.layout.addWidget(self.tabbar)
         self.layout.addWidget(self.Toolbar)
         self.layout.addWidget(self.container)
@@ -113,25 +122,22 @@ class App(QFrame):
         self.tabbar.addTab("New Tab")
         self.tabbar.setTabData(i, {"object": "tab" + str(i), "initial": i})
 
-
-
         self.tabbar.setCurrentIndex(i)
 
         self.tabCount += 1
 
     def SwitchTab(self, i):
-        tab_data = self.tabbar.tabData(i)
-        print("tab:", tab_data)
-
+        # Switch to tab
+        tab_data = self.tabbar.tabData(i)["object"]
         tab_content = self.findChild(QWidget, tab_data)
-        self.oontainer.layout.setCurrentWidget(tab_content)
+        self.container.layout.setCurrentWidget(tab_content)
 
     def BrowseTo(self):
         text = self.addressbar.text()
         print(text)
 
         i = self.tabbar.currentIndex()
-        tab = self.tabbar.tabData(i)
+        tab = self.tabbar.tabData(i)["object"]
         wv = self.findChild(QWidget, tab).content
 
         if "http" not in text:
@@ -145,9 +151,6 @@ class App(QFrame):
         wv.load(QUrl.fromUserInput(url))
 
     def SetTabContent(self, i, type):
-        # self.tabs[i].objectName = tab1
-        # self.tabbar.tabData(i)["object"] = tab1
-
         tab_name = self.tabs[i].objectName()
         # tab1
 
@@ -171,6 +174,28 @@ class App(QFrame):
                 running = False
             else:
                 count += 1
+
+    def GoBack(self):
+        activeIndex = self.tabbar.currentIndex()
+        tab_name = self.tabbar.tabData(activeIndex)["object"]
+        tab_content = self.findChild(QWidget, tab_name).content()
+
+        tab_content.back()
+
+
+    def GoForward(self):
+        activeIndex = self.tabbar.currentIndex()
+        tab_name = self.tabbar.tabData(activeIndex)["object"]
+        tab_content = self.findChild(QWidget, tab_name).content
+
+        tab_content.forward()
+
+    def ReloadPage(self):
+        activeIndex = self.tabbar.currentIndex()
+        tab_name = self.tabbar.tabData(activeIndex)["object"]
+        tab_content = self.findChild(QWidget, tab_name).content
+
+        tab_content.reload()
 
 
 if __name__ == "__main__":
