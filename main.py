@@ -4,9 +4,9 @@ import json
 
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                             QPushButton, QLabel, QLineEdit, QTabBar,
-                            QFrame, QStackedLayout, QTabWidget)
+                            QFrame, QStackedLayout, QTabWidget, QShortcut, QKeySequenceEdit )
 
-from PyQt5.QtGui import QIcon, QWindow, QImage
+from PyQt5.QtGui import QIcon, QWindow, QImage, QKeySequence
 from PyQt5.QtCore import *
 from PyQt5.QtWebEngineWidgets import *
 
@@ -20,10 +20,11 @@ class AddressBar(QLineEdit):
 class App(QFrame):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Web Browser")
+        self.setWindowTitle("Python QT Web Browser")
 
         self.setMinimumSize(1920, 1200)
         self.CreateApp()
+        self.setWindowIcon(QIcon("resources/icons/PyQt.jpg"))
 
 
 
@@ -32,12 +33,22 @@ class App(QFrame):
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0,0,0,0)
 
+
+
         # Create Tabs
         self.tabbar = QTabBar(movable=True, tabsClosable=True)
         self.tabbar.tabCloseRequested.connect(self.CloseTab)
         self.tabbar.tabBarClicked.connect(self.SwitchTab)
         self.tabbar.setCurrentIndex(0)
         self.tabbar.setDrawBase(False)
+        self.tabbar.setLayoutDirection(Qt.LeftToRight)
+        self.tabbar.setElideMode(Qt.ElideLeft)
+
+        self.shortcutNewTab = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.shortcutNewTab.activated.connect(self.AddTab)
+
+        self.shortcutReload = QShortcut(QKeySequence("Ctrl+R"), self)
+        self.shortcutReload.activated.connect(self.ReloadPage)
 
         # Keep track of the tabs
         self.tabCount = 0
